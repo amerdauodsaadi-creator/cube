@@ -787,28 +787,164 @@
             downloadAnchor.remove();
         }
 
+        // Color definitions for standard 3x3 sides:
+        // G = Green, R = Red, B = Blue, O = Orange, Y = Yellow
+        const C = {
+            G: '#22c55e',
+            R: '#ef4444',
+            B: '#3b82f6',
+            O: '#f97316',
+            Y: '#eab308'
+        };
+
         const pllData = [
-            { name: "Aa Perm", alg: "x R' D2 R U2 R' D2 R U2 x'", alt: "y x' R2 D2 R' U' R D2 R' U R' x", arrows: [{from:[0,0], to:[2,0]}, {from:[2,0], to:[0,0]}, {from:[0,2], to:[0,0]}] },
-            { name: "Ab Perm", alg: "x R U2 R' D2 R U2 R' D2 x'", alt: "y x' R U' R' D2 R U R' D2 R2 x", arrows: [{from:[0,0], to:[0,2]}, {from:[0,2], to:[2,0]}] },
-            { name: "F Perm", alg: "R' U' F' R U R' U' R' F R2 U' R' U' R U R' U R", alt: "y1 M' U' F' R U R' U' R' F R2 U' R' U' R U R'", arrows: [{from:[0,1], to:[2,1]}, {from:[0,0], to:[1,0]}] },
-            { name: "Ga Perm", alg: "R2 U R' U R' U' R U' R2 D U' R' U R D'", alt: "R2 u R' U R' U' R u' R2 y' R' U R", arrows: [{from:[0,1], to:[2,1]}, {from:[0,0], to:[2,2]}] },
-            { name: "Gb Perm", alg: "F' U' F R2 u R' U R U' R u' R2", alt: "R' U' R y R2 u R' U R U' R u' R2", arrows: [{from:[0,1], to:[1,0]}, {from:[2,0], to:[2,2]}] },
-            { name: "Gc Perm", alg: "R2 U' R U' R U R' U R2 D' U R U' R' D", alt: "R2 u' R U' R U R' u R2 y R U' R'", arrows: [{from:[0,1], to:[2,1]}, {from:[0,2], to:[2,0]}] },
-            { name: "Gd Perm", alg: "R U R' U' D R2 U' R U' R' U R' U R2 D'", alt: "R' U' R U D' R2 U R' U R U' R U' R2 D", arrows: [{from:[1,0], to:[2,1]}, {from:[0,0], to:[0,2]}] },
-            { name: "Ja Perm", alg: "x R2 F R F' R U2 r' U r U2 x'", alt: "y2 L' U' L F L' U' L U L F' L2 U L", arrows: [{from:[0,0], to:[0,2]}, {from:[0,1], to:[0,2]}] },
-            { name: "Jb Perm", alg: "R U R' F' R U R' U' R' F R2 U' R'", alt: "y2 L U2 L' U2 L F' L' U' L U L F L2", arrows: [{from:[2,0], to:[2,2]}, {from:[2,1], to:[2,2]}] },
-            { name: "Ra Perm", alg: "R U R' F' R U2 R' U2 R' F R U R U2 R'", alt: "y2 L U2 L' U2 L F' L' U' L U L F L2", arrows: [{from:[0,1], to:[2,1]}, {from:[0,2], to:[2,2]}] },
-            { name: "Rb Perm", alg: "R' U2 R U2 R' F R U R' U' R' F' R2", alt: "y' R' U2 R' D' R U' R' D R U R U' R' U' R", arrows: [{from:[0,1], to:[2,1]}, {from:[0,0], to:[2,0]}] },
-            { name: "T Perm", alg: "R U R' U' R' F R2 U' R' U' R U R' F'", alt: "R U R' U' R' F R2 U' R' U' R U R' F'", arrows: [{from:[0,1], to:[2,1]}, {from:[2,0], to:[2,2]}] },
-            { name: "E Perm", alg: "x' R U' R' D R U R' D' R U R' D R U' R' D' x", alt: "y x' R U' R' D R U R' D' R U R' D R U' R' D'", arrows: [{from:[0,0], to:[2,0]}, {from:[0,2], to:[2,2]}] },
-            { name: "Na Perm", alg: "R U R' U R U R' F' R U R' U' R' F R2 U' R' U2 R U' R'", alt: "z U R' D R2 U' R D' U R' D R2 U' R D' z'", arrows: [{from:[0,0], to:[2,2]}, {from:[0,1], to:[2,1]}] },
-            { name: "Nb Perm", alg: "R' U R U' R' F' U' F R U R' F R' F' R U' R", alt: "R' U R' F R F' R U' R' F' U F R U R' U' R", arrows: [{from:[2,0], to:[0,2]}, {from:[0,1], to:[2,1]}] },
-            { name: "V Perm", alg: "R' U R' U' y R' F' R2 U' R' U R' F R F", alt: "R' U R' U' z' x' R2 U' R' U R' F R F", arrows: [{from:[0,0], to:[2,2]}, {from:[0,1], to:[1,2]}] },
-            { name: "Y Perm", alg: "F R U' R' U' R U R' F' R U R' U' R' F R F'", alt: "F R U' R' U' R U R' F' R U R' U' R' F R F'", arrows: [{from:[0,0], to:[2,2]}, {from:[1,0], to:[2,1]}] },
-            { name: "H Perm", alg: "M2 U M2 U2 M2 U M2", alt: "M2 U' M2 U2 M2 U' M2", arrows: [{from:[0,1], to:[2,1]}, {from:[1,0], to:[1,2]}] },
-            { name: "Ua Perm", alg: "M2 U M U2 M' U M2", alt: "R U' R U R U R U' R' U' R2", arrows: [{from:[0,1], to:[2,1]}, {from:[2,1], to:[1,0]}] },
-            { name: "Ub Perm", alg: "M2 U' M U2 M' U' M2", alt: "R2 U R U R' U' R' U' R' U R'", arrows: [{from:[0,1], to:[1,0]}, {from:[1,0], to:[2,1]}] },
-            { name: "Z Perm", alg: "M' U M2 U M2 U M' U2 M2", alt: "M2 U M2 U M' U2 M2 U2 M'", arrows: [{from:[1,0], to:[0,1]}, {from:[2,1], to:[1,2]}] }
+            { 
+                name: "Aa Perm", 
+                alg: "x R' D2 R U2 R' D2 R U2 x'", 
+                alt: "y x' R2 D2 R' U' R D2 R' U R' x", 
+                arrows: [{from:[0,0], to:[2,0]}, {from:[2,0], to:[0,0]}, {from:[0,2], to:[0,0]}],
+                sides: { top: [C.R, C.B, C.B], right: [C.O, C.O, C.R], bottom: [C.O, C.G, C.G], left: [C.B, C.R, C.R] }
+            },
+            { 
+                name: "Ab Perm", 
+                alg: "x R U2 R' D2 R U2 R' D2 x'", 
+                alt: "y x' R U' R' D2 R U R' D2 R2 x", 
+                arrows: [{from:[0,0], to:[0,2]}, {from:[0,2], to:[2,0]}],
+                sides: { top: [C.B, C.B, C.R], right: [C.B, C.O, C.O], left: [C.R, C.R, C.B], bottom: [C.O, C.G, C.G] }
+            },
+            { 
+                name: "F Perm", 
+                alg: "R' U' F' R U R' U' R' F R2 U' R' U' R U R' U R", 
+                alt: "y1 M' U' F' R U R' U' R' F R2 U' R' U' R U R'", 
+                arrows: [{from:[0,1], to:[2,1]}, {from:[0,0], to:[1,0]}],
+                sides: { top: [C.B, C.B, C.B], right: [C.R, C.O, C.R], bottom: [C.G, C.G, C.G], left: [C.O, C.R, C.O] }
+            },
+            { 
+                name: "Ga Perm", 
+                alg: "R2 U R' U R' U' R U' R2 D U' R' U R D'", 
+                alt: "R2 u R' U R' U' R u' R2 y' R' U R", 
+                arrows: [{from:[0,1], to:[2,1]}, {from:[0,0], to:[2,2]}],
+                sides: { top: [C.B, C.O, C.R], right: [C.O, C.R, C.B], bottom: [C.G, C.B, C.G], left: [C.R, C.G, C.O] }
+            },
+            { 
+                name: "Gb Perm", 
+                alg: "F' U' F R2 u R' U R U' R u' R2", 
+                alt: "R' U' R y R2 u R' U R U' R u' R2", 
+                arrows: [{from:[0,1], to:[1,0]}, {from:[2,0], to:[2,2]}],
+                sides: { top: [C.B, C.G, C.R], right: [C.B, C.O, C.O], bottom: [C.G, C.B, C.B], left: [C.O, C.R, C.R] }
+            },
+            { 
+                name: "Gc Perm", 
+                alg: "R2 U' R U' R U R' U R2 D' U R U' R' D", 
+                alt: "R2 u' R U' R U R' u R2 y R U' R'", 
+                arrows: [{from:[0,1], to:[2,1]}, {from:[0,2], to:[2,0]}],
+                sides: { top: [C.B, C.O, C.B], right: [C.O, C.G, C.R], bottom: [C.G, C.R, C.G], left: [C.R, C.B, C.O] }
+            },
+            { 
+                name: "Gd Perm", 
+                alg: "R U R' U' D R2 U' R U' R' U R' U R2 D'", 
+                alt: "R' U' R U D' R2 U R' U R U' R U' R2 D", 
+                arrows: [{from:[1,0], to:[2,1]}, {from:[0,0], to:[0,2]}],
+                sides: { top: [C.O, C.R, C.B], right: [C.B, C.O, C.O], bottom: [C.R, C.G, C.G], left: [C.G, C.B, C.R] }
+            },
+            { 
+                name: "Ja Perm", 
+                alg: "x R2 F R F' R U2 r' U r U2 x'", 
+                alt: "y2 L' U' L F L' U' L U L F' L2 U L", 
+                arrows: [{from:[0,0], to:[0,2]}, {from:[0,1], to:[0,2]}],
+                sides: { top: [C.O, C.B, C.B], right: [C.B, C.O, C.O], bottom: [C.R, C.G, C.G], left: [C.G, C.R, C.R] }
+            },
+            { 
+                name: "Jb Perm", 
+                alg: "R U R' F' R U R' U' R' F R2 U' R'", 
+                alt: "y2 L U2 L' U2 L F' L' U' L U L F L2", 
+                arrows: [{from:[2,0], to:[2,2]}, {from:[2,1], to:[2,2]}],
+                sides: { top: [C.B, C.B, C.O], right: [C.R, C.R, C.G], bottom: [C.G, C.G, C.R], left: [C.O, C.O, C.B] }
+            },
+            { 
+                name: "Ra Perm", 
+                alg: "R U R' F' R U2 R' U2 R' F R U R U2 R'", 
+                alt: "y2 L U2 L' U2 L F' L' U' L U L F L2", 
+                arrows: [{from:[0,1], to:[2,1]}, {from:[0,2], to:[2,2]}],
+                sides: { top: [C.B, C.R, C.O], right: [C.O, C.O, C.B], bottom: [C.G, C.B, C.R], left: [C.R, C.G, C.G] }
+            },
+            { 
+                name: "Rb Perm", 
+                alg: "R' U2 R U2 R' F R U R' U' R' F' R2", 
+                alt: "y' R' U2 R' D' R U' R' D R U R U' R' U' R", 
+                arrows: [{from:[0,1], to:[2,1]}, {from:[0,0], to:[2,0]}],
+                sides: { top: [C.R, C.O, C.B], right: [C.B, C.B, C.O], bottom: [C.G, C.R, C.R], left: [C.O, C.G, C.G] }
+            },
+            { 
+                name: "T Perm", 
+                alg: "R U R' U' R' F R2 U' R' U' R U R' F'", 
+                alt: "R U R' U' R' F R2 U' R' U' R U R' F'", 
+                arrows: [{from:[0,1], to:[2,1]}, {from:[2,0], to:[2,2]}],
+                sides: { top: [C.B, C.R, C.B], right: [C.O, C.O, C.R], bottom: [C.G, C.O, C.G], left: [C.R, C.G, C.O] }
+            },
+            { 
+                name: "E Perm", 
+                alg: "x' R U' R' D R U R' D' R U R' D R U' R' D' x", 
+                alt: "y x' R U' R' D R U R' D' R U R' D R U' R' D'", 
+                arrows: [{from:[0,0], to:[2,0]}, {from:[0,2], to:[2,2]}],
+                sides: { top: [C.O, C.B, C.R], right: [C.B, C.O, C.G], bottom: [C.R, C.G, C.O], left: [C.G, C.R, C.B] }
+            },
+            { 
+                name: "Na Perm", 
+                alg: "R U R' U R U R' F' R U R' U' R' F R2 U' R' U2 R U' R'", 
+                alt: "z U R' D R2 U' R D' U R' D R2 U' R D' z'", 
+                arrows: [{from:[0,0], to:[2,2]}, {from:[0,1], to:[2,1]}],
+                sides: { top: [C.O, C.R, C.B], right: [C.B, C.G, C.O], bottom: [C.R, C.O, C.G], left: [C.G, C.B, C.R] }
+            },
+            { 
+                name: "Nb Perm", 
+                alg: "R' U R U' R' F' U' F R U R' F R' F' R U' R", 
+                alt: "R' U R' F R F' R U' R' F' U F R U R' U' R", 
+                arrows: [{from:[2,0], to:[0,2]}, {from:[0,1], to:[2,1]}],
+                sides: { top: [C.B, C.R, C.O], right: [C.O, C.G, C.B], bottom: [C.G, C.O, C.R], left: [C.R, C.B, C.G] }
+            },
+            { 
+                name: "V Perm", 
+                alg: "R' U R' U' y R' F' R2 U' R' U R' F R F", 
+                alt: "R' U R' U' z' x' R2 U' R' U R' F R F", 
+                arrows: [{from:[0,0], to:[2,2]}, {from:[0,1], to:[1,2]}],
+                sides: { top: [C.O, C.R, C.B], right: [C.G, C.O, C.O], bottom: [C.R, C.B, C.G], left: [C.B, C.G, C.R] }
+            },
+            { 
+                name: "Y Perm", 
+                alg: "F R U' R' U' R U R' F' R U R' U' R' F R F'", 
+                alt: "F R U' R' U' R U R' F' R U R' U' R' F R F'", 
+                arrows: [{from:[0,0], to:[2,2]}, {from:[1,0], to:[2,1]}],
+                sides: { top: [C.O, C.O, C.R], right: [C.B, C.R, C.O], bottom: [C.R, C.G, C.B], left: [C.G, C.B, C.G] }
+            },
+            { 
+                name: "H Perm", 
+                alg: "M2 U M2 U2 M2 U M2", 
+                alt: "M2 U' M2 U2 M2 U' M2", 
+                arrows: [{from:[0,1], to:[2,1]}, {from:[1,0], to:[1,2]}],
+                sides: { top: [C.B, C.G, C.B], right: [C.O, C.R, C.O], bottom: [C.G, C.B, C.G], left: [C.R, C.O, C.R] }
+            },
+            { 
+                name: "Ua Perm", 
+                alg: "M2 U M U2 M' U M2", 
+                alt: "R U' R U R U R U' R' U' R2", 
+                arrows: [{from:[0,1], to:[2,1]}, {from:[2,1], to:[1,0]}],
+                sides: { top: [C.B, C.G, C.B], right: [C.O, C.O, C.O], bottom: [C.G, C.R, C.G], left: [C.R, C.B, C.R] }
+            },
+            { 
+                name: "Ub Perm", 
+                alg: "M2 U' M U2 M' U' M2", 
+                alt: "R2 U R U R' U' R' U' R' U R'", 
+                arrows: [{from:[0,1], to:[1,0]}, {from:[1,0], to:[2,1]}],
+                sides: { top: [C.B, C.R, C.B], right: [C.O, C.O, C.O], bottom: [C.G, C.B, C.G], left: [C.R, C.G, C.R] }
+            },
+            { 
+                name: "Z Perm", 
+                alg: "M' U M2 U M2 U M' U2 M2", 
+                alt: "M2 U M2 U M' U2 M2 U2 M'", 
+                arrows: [{from:[1,0], to:[0,1]}, {from:[2,1], to:[1,2]}],
+                sides: { top: [C.B, C.O, C.B], right: [C.O, C.G, C.O], bottom: [C.G, C.R, C.G], left: [C.R, C.B, C.R] }
+            }
         ];
 
         function renderPllGrid() {
@@ -820,7 +956,7 @@
                 card.className = 'bg-slate-800/60 rounded-2xl border border-slate-700/60 p-5 shadow-lg flex flex-col justify-between hover:border-indigo-500/50 transition-all cursor-pointer group';
                 card.onclick = () => copyToClipboard(p.alg, p.name);
 
-                const svg = generateTopDownSVG(p.arrows);
+                const svg = generateTopDownSVG(p.arrows, p.sides);
 
                 card.innerHTML = `
                     <div class="flex items-start justify-between">
@@ -845,36 +981,53 @@
             });
         }
 
-        function generateTopDownSVG(arrows = []) {
+        function generateTopDownSVG(arrows = [], sides = null) {
             let arrowPaths = '';
-            const cellStep = 24;
-            const offset = 14;
+            const cellStep = 18;
+            const offset = 22;
 
             arrows.forEach(arr => {
                 const x1 = offset + arr.from[0] * cellStep;
                 const y1 = offset + arr.from[1] * cellStep;
                 const x2 = offset + arr.to[0] * cellStep;
                 const y2 = offset + arr.to[1] * cellStep;
-                arrowPaths += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"/>`;
+                arrowPaths += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#ffffff" stroke-width="3" stroke-linecap="round" marker-end="url(#arrowhead)"/>`;
             });
 
+            let sideBars = '';
+            if (sides) {
+                sides.top.forEach((val, i) => {
+                    sideBars += `<rect x="${14 + i * 18}" y="8" width="16" height="4" rx="1" fill="${val}" />`;
+                });
+                sides.right.forEach((val, i) => {
+                    sideBars += `<rect x="68" y="${14 + i * 18}" width="4" height="16" rx="1" fill="${val}" />`;
+                });
+                sides.bottom.forEach((val, i) => {
+                    sideBars += `<rect x="${14 + i * 18}" y="68" width="16" height="4" rx="1" fill="${val}" />`;
+                });
+                sides.left.forEach((val, i) => {
+                    sideBars += `<rect x="8" y="${14 + i * 18}" width="4" height="16" rx="1" fill="${val}" />`;
+                });
+            }
+
             return `
-                <svg viewBox="0 0 76 76" class="w-full h-full">
+                <svg viewBox="0 0 80 80" class="w-full h-full">
                     <defs>
                         <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
-                            <polygon points="0 0, 6 3, 0 6" fill="#f59e0b" />
+                            <polygon points="0 0, 6 3, 0 6" fill="#ffffff" />
                         </marker>
                     </defs>
-                    <rect x="2" y="2" width="72" height="72" rx="6" fill="#0f172a" stroke="#334155" stroke-width="2"/>
-                    <rect x="4" y="4" width="20" height="20" rx="3" fill="#eab308" />
-                    <rect x="28" y="4" width="20" height="20" rx="3" fill="#eab308" />
-                    <rect x="52" y="4" width="20" height="20" rx="3" fill="#eab308" />
-                    <rect x="4" y="28" width="20" height="20" rx="3" fill="#eab308" />
-                    <rect x="28" y="28" width="20" height="20" rx="3" fill="#eab308" />
-                    <rect x="52" y="28" width="20" height="20" rx="3" fill="#eab308" />
-                    <rect x="4" y="52" width="20" height="20" rx="3" fill="#eab308" />
-                    <rect x="28" y="52" width="20" height="20" rx="3" fill="#eab308" />
-                    <rect x="52" y="52" width="20" height="20" rx="3" fill="#eab308" />
+                    <rect x="12" y="12" width="56" height="56" rx="4" fill="#0f172a" stroke="#1e293b" stroke-width="2"/>
+                    <rect x="14" y="14" width="16" height="16" rx="2" fill="#eab308" />
+                    <rect x="32" y="14" width="16" height="16" rx="2" fill="#eab308" />
+                    <rect x="50" y="14" width="16" height="16" rx="2" fill="#eab308" />
+                    <rect x="14" y="32" width="16" height="16" rx="2" fill="#eab308" />
+                    <rect x="32" y="32" width="16" height="16" rx="2" fill="#eab308" />
+                    <rect x="50" y="32" width="16" height="16" rx="2" fill="#eab308" />
+                    <rect x="14" y="50" width="16" height="16" rx="2" fill="#eab308" />
+                    <rect x="32" y="50" width="16" height="16" rx="2" fill="#eab308" />
+                    <rect x="50" y="50" width="16" height="16" rx="2" fill="#eab308" />
+                    ${sideBars}
                     ${arrowPaths}
                 </svg>
             `;
@@ -1030,7 +1183,7 @@
 
             const diagramBox = document.getElementById('trainerDiagram');
             if (trainerType === 'pll') {
-                diagramBox.innerHTML = generateTopDownSVG(currentTrainerItem.arrows);
+                diagramBox.innerHTML = generateTopDownSVG(currentTrainerItem.arrows, currentTrainerItem.sides);
             } else {
                 diagramBox.innerHTML = generateOllSVG(currentTrainerItem.yellowGrid, currentTrainerItem.sides);
             }
