@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeedCube Pro | Speedtimer & Alg Library</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.4);
+            border-radius: 9999px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(75, 85, 99, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col transition-colors duration-200" id="appBody">
+
+    <header class="border-b border-slate-800 bg-slate-950/70 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                        <i data-lucide="box" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-indigo-400 to-violet-300 bg-clip-text text-transparent">
+                        SpeedCube<span class="text-xs ml-1 px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">PRO</span>
+                    </span>
+                </div>
+
+                <!-- Main Navigation -->
+                <nav class="hidden md:flex items-center space-x-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
+                    <button onclick="switchTab('timer')" id="nav-timer" class="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 bg-indigo-600 text-white shadow">
+                        <i data-lucide="timer" class="w-4 h-4"></i>
+                        <span>Timer</span>
+                    </button>
+                    <button onclick="switchTab('pll')" id="nav-pll" class="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
+                        <i data-lucide="grid" class="w-4 h-4"></i>
+                        <span>PLL (21)</span>
+                    </button>
+                    <button onclick="switchTab('oll')" id="nav-oll" class="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
+                        <i data-lucide="layers" class="w-4 h-4"></i>
+                        <span>OLL (57)</span>
+                    </button>
+                    <button onclick="switchTab('trainer')" id="nav-trainer" class="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50">
+                        <i data-lucide="brain-circuit" class="w-4 h-4"></i>
+                        <span>Flashcard Trainer</span>
+                    </button>
+                </nav>
+
+                <!-- Audio & Theme Controls -->
+                <div class="flex items-center space-x-3">
+                    <button id="soundToggle" onclick="toggleSound()" class="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 transition-colors" title="Toggle Beep Sound">
+                        <i data-lucide="volume-2" id="soundIcon" class="w-5 h-5"></i>
+                    </button>
+                    <button id="themeToggle" onclick="toggleTheme()" class="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-slate-300 transition-colors" title="Toggle Theme">
+                        <i data-lucide="sun" id="themeIcon" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Row -->
+        <div class="md:hidden flex border-t border-slate-800/80 bg-slate-950/90 px-2 py-1.5 space-x-1 overflow-x-auto">
+            <button onclick="switchTab('timer')" id="mob-nav-timer" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold whitespace-nowrap bg-indigo-600 text-white flex items-center justify-center space-x-1">
+                <i data-lucide="timer" class="w-3.5 h-3.5"></i><span>Timer</span>
+            </button>
+            <button onclick="switchTab('pll')" id="mob-nav-pll" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-400 flex items-center justify-center space-x-1">
+                <i data-lucide="grid" class="w-3.5 h-3.5"></i><span>PLL</span>
+            </button>
+            <button onclick="switchTab('oll')" id="mob-nav-oll" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-400 flex items-center justify-center space-x-1">
+                <i data-lucide="layers" class="w-3.5 h-3.5"></i><span>OLL</span>
+            </button>
+            <button onclick="switchTab('trainer')" id="mob-nav-trainer" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-400 flex items-center justify-center space-x-1">
+                <i data-lucide="brain-circuit" class="w-3.5 h-3.5"></i><span>Trainer</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
+
+        <section id="section-timer" class="flex-1 flex flex-col space-y-6">
+            
+            <!-- Scramble Display Card -->
+            <div class="bg-slate-800/60 rounded-2xl p-4 sm:p-6 border border-slate-700/60 shadow-xl backdrop-blur flex flex-col items-center justify-center text-center space-y-3 relative group">
+                <div class="flex items-center justify-between w-full text-xs font-semibold uppercase tracking-wider text-slate-400">
+                    <span class="flex items-center space-x-1">
+                        <i data-lucide="shuffle" class="w-3.5 h-3.5 text-indigo-400"></i>
+                        <span>WCA 3x3x3 Scramble</span>
+                    </span>
+                    <button onclick="generateScramble()" class="p-1.5 hover:bg-slate-700/80 rounded-lg transition-colors text-indigo-400 hover:text-indigo-300 flex items-center space-x-1">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                        <span class="text-xs">Next</span>
+                    </button>
+                </div>
+                <div id="scrambleDisplay" class="font-mono text-lg sm:text-2xl font-bold tracking-wider text-slate-100 py-2 leading-relaxed selection:bg-indigo-500 selection:text-white">
+                    Generating scramble...
+                </div>
+                <div class="text-xs text-slate-400 flex items-center space-x-4">
+                    <span>Press Space or Hold Screen to Start</span>
+                </div>
+            </div>
+
+            <!-- Timer Area -->
+            <div id="timerContainer" class="flex-1 bg-slate-800/40 rounded-3xl border border-slate-800 flex flex-col items-center justify-center p-8 min-h-[280px] sm:min-h-[360px] relative overflow-hidden cursor-pointer touch-none transition-all duration-200">
+                <!-- Visual state halo effect -->
+                <div id="timerHalo" class="absolute inset-0 bg-indigo-500/0 transition-all duration-300 pointer-events-none"></div>
+
+                <!-- Status indicator banner -->
+                <div id="timerStatus" class="mb-4 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest bg-slate-800/80 border border-slate-700/80 text-slate-400 flex items-center space-x-2">
+                    <div id="statusDot" class="w-2 h-2 rounded-full bg-slate-500"></div>
+                    <span id="statusText">Ready</span>
+                </div>
+
+                <!-- Clock readout -->
+                <div id="timerDisplay" class="font-mono text-6xl sm:text-8xl md:text-9xl font-black tracking-tight text-slate-100 select-none drop-shadow-lg transition-colors">
+                    0.000
+                </div>
+
+                <!-- Quick Action Bar for Last Solve (+2 / DNF / Delete) -->
+                <div id="lastSolveQuickActions" class="mt-4 flex items-center space-x-2 z-10 hidden">
+                    <button id="btnQuickPlus2" onclick="toggleLastSolvePenalty('+2')" class="px-3 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-mono text-xs font-bold transition-all shadow">
+                        +2
+                    </button>
+                    <button id="btnQuickDNF" onclick="toggleLastSolvePenalty('dnf')" class="px-3 py-1.5 rounded-xl border border-rose-500/40 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-mono text-xs font-bold transition-all shadow">
+                        DNF
+                    </button>
+                    <button onclick="deleteLastSolve()" class="px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs font-bold transition-all shadow flex items-center space-x-1">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        <span>Delete</span>
+                    </button>
+                </div>
+
+                <!-- Contextual help overlay -->
+                <div id="timerInstructions" class="mt-6 text-sm text-slate-400 font-medium text-center max-w-sm">
+                    Hold <kbd class="px-2 py-0.5 rounded bg-slate-700 border border-slate-600 font-mono text-xs text-slate-200">SPACE</kbd> or touch & hold screen until timer turns green.
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50 flex flex-col items-center justify-center text-center">
+                    <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Solves</span>
+                    <span id="statCount" class="text-2xl font-black font-mono text-indigo-400 mt-1">0</span>
+                </div>
+                <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50 flex flex-col items-center justify-center text-center">
+                    <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Personal Best</span>
+                    <span id="statPB" class="text-2xl font-black font-mono text-emerald-400 mt-1">--</span>
+                </div>
+                <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50 flex flex-col items-center justify-center text-center">
+                    <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Session Mean</span>
+                    <span id="statMean" class="text-2xl font-black font-mono text-slate-200 mt-1">--</span>
+                </div>
+                <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50 flex flex-col items-center justify-center text-center">
+                    <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Ao5</span>
+                    <span id="statAo5" class="text-2xl font-black font-mono text-amber-400 mt-1">--</span>
+                </div>
+                <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50 flex flex-col items-center justify-center text-center col-span-2 sm:col-span-1">
+                    <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Ao12</span>
+                    <span id="statAo12" class="text-2xl font-black font-mono text-purple-400 mt-1">--</span>
+                </div>
+            </div>
+
+            <!-- Solve History & Management -->
+            <div class="bg-slate-800/60 rounded-2xl border border-slate-700/60 p-4 sm:p-6 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="history" class="w-5 h-5 text-indigo-400"></i>
+                        <h2 class="font-bold text-lg text-slate-100">Session History</h2>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="exportSolves()" class="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs font-semibold text-slate-200 flex items-center space-x-1 transition-colors">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                            <span>Export</span>
+                        </button>
+                        <button onclick="confirmClearSolves()" class="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-semibold flex items-center space-x-1 transition-colors">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            <span>Clear All</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto max-h-64 overflow-y-auto pr-1">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="text-xs uppercase text-slate-400 border-b border-slate-700/80">
+                                <th class="py-2.5 px-3">#</th>
+                                <th class="py-2.5 px-3">Time</th>
+                                <th class="py-2.5 px-3 hidden sm:table-cell">Scramble</th>
+                                <th class="py-2.5 px-3 text-right">Penalty / Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody" class="divide-y divide-slate-800/60 font-mono">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-pll" class="hidden space-y-6">
+            <!-- Search & Info Header -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-slate-800/60 p-4 sm:p-6 rounded-2xl border border-slate-700/60">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-slate-100 flex items-center space-x-2">
+                        <span>Permutation of the Last Layer</span>
+                        <span class="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold">21 Cases</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">Click any algorithm to quickly copy it to your clipboard.</p>
+                </div>
+                <div class="relative min-w-[240px]">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="pllSearch" oninput="filterPll()" placeholder="Search Perms (e.g., Aa, Y, T, Nb)..." class="w-full bg-slate-900/90 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
+                </div>
+            </div>
+
+            <!-- PLL Cards Grid -->
+            <div id="pllGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Dynamically generated PLL cards -->
+            </div>
+        </section>
+
+        <section id="section-oll" class="hidden space-y-6">
+            <!-- Search & Filter Controls -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-slate-800/60 p-4 sm:p-6 rounded-2xl border border-slate-700/60">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-slate-100 flex items-center space-x-2">
+                        <span>Orientation of the Last Layer</span>
+                        <span class="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold">57 Cases</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">Categorized OLL algorithms with top-down yellow facelet diagrams.</p>
+                </div>
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                    <select id="ollCategoryFilter" onchange="filterOll()" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <option value="ALL">All Categories (57)</option>
+                        <option value="Cross">Cross / Edges Solved (OLL 21-27)</option>
+                        <option value="Dot">Dot Cases (OLL 1-4, 17-19)</option>
+                        <option value="I-Shape">I-Shapes (OLL 51-56)</option>
+                        <option value="T-Shape">T-Shapes (OLL 33, 45)</option>
+                        <option value="P-Shape">P-Shapes (OLL 31, 32, 43, 44)</option>
+                        <option value="L-Shape">L-Shapes (OLL 47-50)</option>
+                        <option value="C-Shape">C-Shapes (OLL 34, 46)</option>
+                        <option value="W-Shape">W-Shapes (OLL 36, 38)</option>
+                        <option value="Knight">Knight Moves (OLL 13-16)</option>
+                        <option value="Awkward">Awkward Shapes (OLL 29, 30, 41, 42)</option>
+                    </select>
+                    <div class="relative">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="ollSearch" oninput="filterOll()" placeholder="Search OLL # or moves..." class="w-full bg-slate-900/90 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- OLL Container -->
+            <div id="ollGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Dynamically populated OLL cards -->
+            </div>
+        </section>
+
+        <section id="section-trainer" class="hidden flex-1 flex flex-col items-center justify-center space-y-6">
+            <div class="w-full max-w-xl bg-slate-800/80 rounded-3xl border border-slate-700/80 p-6 sm:p-8 shadow-2xl flex flex-col items-center text-center space-y-6">
+                <div class="flex items-center justify-between w-full">
+                    <div class="flex space-x-2">
+                        <button onclick="setTrainerType('pll')" id="trainer-type-pll" class="px-3 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow">PLL Mode</button>
+                        <button onclick="setTrainerType('oll')" id="trainer-type-oll" class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-700 text-slate-300 hover:bg-slate-600">OLL Mode</button>
+                    </div>
+                    <span id="trainerStreak" class="text-xs font-bold font-mono px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Streak: 0</span>
+                </div>
+
+                <div class="text-slate-400 text-sm font-medium">Identify the case pattern shown below:</div>
+
+                <!-- Case SVG Container -->
+                <div id="trainerDiagram" class="w-40 h-40 p-4 bg-slate-900 rounded-2xl border border-slate-700 flex items-center justify-center shadow-inner">
+                    <!-- SVG appended dynamically -->
+                </div>
+
+                <div id="trainerCaseName" class="text-2xl font-black text-slate-100 hidden">
+                    <!-- Revealed Name -->
+                </div>
+
+                <div id="trainerAlgBox" class="w-full bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-sm text-indigo-300 hidden break-words">
+                    <!-- Revealed Alg -->
+                </div>
+
+                <!-- Controls -->
+                <div class="flex items-center space-x-3 w-full">
+                    <button id="btnReveal" onclick="revealTrainerAnswer()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-indigo-600/30">
+                        Reveal Answer
+                    </button>
+                    <button id="btnNextQuiz" onclick="nextTrainerQuestion()" class="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-slate-100 font-bold text-sm rounded-xl transition-all hidden">
+                        Next Case <i data-lucide="arrow-right" class="w-4 h-4 inline ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-16 opacity-0 transition-all duration-300 bg-slate-800 text-slate-100 border border-slate-700 px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 pointer-events-none">
+        <div id="toastIcon" class="text-indigo-400">
+            <i data-lucide="check-circle" class="w-5 h-5"></i>
+        </div>
+        <span id="toastMsg" class="text-sm font-semibold">Notification message</span>
+    </div>
+
+    <script>
+        // --- SOUND ENGINE (Web Audio API) ---
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playBeep(freq = 600, type = 'sine', duration = 0.08) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) { console.error(e); }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            if (soundEnabled) {
+                icon.setAttribute('data-lucide', 'volume-2');
+                showToast('Sound feedback enabled');
+            } else {
+                icon.setAttribute('data-lucide', 'volume-x');
+                showToast('Sound feedback muted');
+            }
+            lucide.createIcons();
+        }
+
+        // --- THEME MANAGER ---
+        let darkTheme = true;
+        function toggleTheme() {
+            darkTheme = !darkTheme;
+            const body = document.getElementById('appBody');
+            const icon = document.getElementById('themeIcon');
+            if (darkTheme) {
+                body.classList.add('bg-slate-900', 'text-slate-100');
+                body.classList.remove('bg-slate-100', 'text-slate-800');
+                icon.setAttribute('data-lucide', 'sun');
+            } else {
+                body.classList.remove('bg-slate-900', 'text-slate-100');
+                body.classList.add('bg-slate-100', 'text-slate-800');
+                icon.setAttribute('data-lucide', 'moon');
+            }
+            lucide.createIcons();
+        }
+
+        // --- TOAST NOTIFICATIONS ---
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.innerText = msg;
+            toast.classList.remove('translate-y-16', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                toast.classList.add('translate-y-16', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 2200);
+        }
+
+        function copyToClipboard(text, label) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => showToast(`Copied ${label} algorithm!`));
+            } else {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast(`Copied ${label} algorithm!`);
+            }
+        }
+
+        // --- TAB SWITCHING ---
+        let currentTab = 'timer';
+        function switchTab(tab) {
+            currentTab = tab;
+            ['timer', 'pll', 'oll', 'trainer'].forEach(t => {
+                const sec = document.getElementById(`section-${t}`);
+                const nav = document.getElementById(`nav-${t}`);
+                const mobNav = document.getElementById(`mob-nav-${t}`);
+
+                if (t === tab) {
+                    sec.classList.remove('hidden');
+                    nav.className = 'px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 bg-indigo-600 text-white shadow';
+                    if (mobNav) mobNav.className = 'flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold whitespace-nowrap bg-indigo-600 text-white flex items-center justify-center space-x-1';
+                } else {
+                    sec.classList.add('hidden');
+                    nav.className = 'px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center space-x-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50';
+                    if (mobNav) mobNav.className = 'flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold whitespace-nowrap text-slate-400 flex items-center justify-center space-x-1';
+                }
+            });
+
+            if (tab === 'trainer') initTrainerQuestion();
+        }
+
+        let currentScramble = '';
+        function generateScramble() {
+            const faces = ['U', 'D', 'L', 'R', 'F', 'B'];
+            const modifiers = ['', "'", '2'];
+            const length = 20;
+            const scramble = [];
+            let lastFace = -1;
+            let secondLastFace = -1;
+
+            for (let i = 0; i < length; i++) {
+                let faceIndex;
+                do {
+                    faceIndex = Math.floor(Math.random() * 6);
+                } while (
+                    faceIndex === lastFace || 
+                    (faceIndex === secondLastFace && Math.floor(faceIndex / 2) === Math.floor(lastFace / 2))
+                );
+
+                secondLastFace = lastFace;
+                lastFace = faceIndex;
+
+                const mod = modifiers[Math.floor(Math.random() * 3)];
+                scramble.push(faces[faceIndex] + mod);
+            }
+
+            currentScramble = scramble.join(' ');
+            document.getElementById('scrambleDisplay').innerText = currentScramble;
+        }
+
+        // --- TIMER STATE ENGINE ---
+        // States: 'idle', 'holding', 'ready', 'running'
+        let timerState = 'idle';
+        let holdStart = 0;
+        let holdInterval = null;
+        let timerInterval = null;
+        let startTime = 0;
+        let elapsedTime = 0;
+        let solves = JSON.parse(localStorage.getItem('speedcube_solves') || '[]');
+
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerContainer = document.getElementById('timerContainer');
+        const timerHalo = document.getElementById('timerHalo');
+        const statusText = document.getElementById('statusText');
+        const statusDot = document.getElementById('statusDot');
+        const quickActions = document.getElementById('lastSolveQuickActions');
+
+        function setVisualState(state) {
+            if (state === 'idle') {
+                statusText.innerText = 'Ready';
+                statusDot.className = 'w-2 h-2 rounded-full bg-slate-500';
+                timerHalo.className = 'absolute inset-0 bg-transparent transition-all duration-300 pointer-events-none';
+                timerDisplay.className = 'font-mono text-6xl sm:text-8xl md:text-9xl font-black tracking-tight text-slate-100 select-none drop-shadow-lg';
+            } else if (state === 'holding') {
+                statusText.innerText = 'Hold...';
+                statusDot.className = 'w-2 h-2 rounded-full bg-rose-500 animate-ping';
+                timerHalo.className = 'absolute inset-0 bg-rose-500/10 transition-all duration-300 pointer-events-none';
+                timerDisplay.className = 'font-mono text-6xl sm:text-8xl md:text-9xl font-black tracking-tight text-rose-400 select-none drop-shadow-lg';
+                quickActions.classList.add('hidden');
+            } else if (state === 'ready') {
+                statusText.innerText = 'RELEASE TO START';
+                statusDot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+                timerHalo.className = 'absolute inset-0 bg-emerald-500/20 transition-all duration-300 pointer-events-none';
+                timerDisplay.className = 'font-mono text-6xl sm:text-8xl md:text-9xl font-black tracking-tight text-emerald-400 select-none drop-shadow-lg';
+            } else if (state === 'running') {
+                statusText.innerText = 'TIMING';
+                statusDot.className = 'w-2 h-2 rounded-full bg-indigo-400 animate-pulse';
+                timerHalo.className = 'absolute inset-0 bg-indigo-500/10 transition-all duration-300 pointer-events-none';
+                timerDisplay.className = 'font-mono text-6xl sm:text-8xl md:text-9xl font-black tracking-tight text-indigo-300 select-none drop-shadow-lg';
+                quickActions.classList.add('hidden');
+            }
+        }
+
+        function handleKeyDown(e) {
+            if (currentTab !== 'timer') return;
+            if (e.code === 'Space' && !e.repeat) {
+                e.preventDefault();
+                if (timerState === 'running') {
+                    stopTimer();
+                } else if (timerState === 'idle') {
+                    startHolding();
+                }
+            }
+        }
+
+        function handleKeyUp(e) {
+            if (currentTab !== 'timer') return;
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (timerState === 'ready') {
+                    startTimer();
+                } else if (timerState === 'holding') {
+                    cancelHolding();
+                }
+            }
+        }
+
+        function startHolding() {
+            timerState = 'holding';
+            setVisualState('holding');
+            playBeep(400, 'sine', 0.05);
+            holdStart = Date.now();
+            holdInterval = setInterval(() => {
+                if (Date.now() - holdStart >= 500) {
+                    clearInterval(holdInterval);
+                    timerState = 'ready';
+                    setVisualState('ready');
+                    playBeep(800, 'sine', 0.08);
+                }
+            }, 50);
+        }
+
+        function cancelHolding() {
+            clearInterval(holdInterval);
+            timerState = 'idle';
+            setVisualState('idle');
+        }
+
+        function startTimer() {
+            clearInterval(holdInterval);
+            timerState = 'running';
+            setVisualState('running');
+            startTime = performance.now();
+            timerInterval = setInterval(() => {
+                elapsedTime = performance.now() - startTime;
+                timerDisplay.innerText = formatTime(elapsedTime);
+            }, 10);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            elapsedTime = performance.now() - startTime;
+            timerDisplay.innerText = formatTime(elapsedTime);
+            timerState = 'idle';
+            setVisualState('idle');
+            playBeep(1000, 'sine', 0.1);
+
+            // Save Solve
+            const newSolve = {
+                id: Date.now(),
+                time: elapsedTime,
+                rawTime: elapsedTime,
+                scramble: currentScramble,
+                penalty: 'none', // 'none', '+2', 'dnf'
+                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+            solves.unshift(newSolve);
+            saveSolves();
+            generateScramble();
+        }
+
+        // Touch event handlers for mobile devices
+        timerContainer.addEventListener('touchstart', (e) => {
+            if (e.target.closest('#lastSolveQuickActions')) return;
+            e.preventDefault();
+            if (timerState === 'running') {
+                stopTimer();
+            } else if (timerState === 'idle') {
+                startHolding();
+            }
+        });
+
+        timerContainer.addEventListener('touchend', (e) => {
+            if (e.target.closest('#lastSolveQuickActions')) return;
+            e.preventDefault();
+            if (timerState === 'ready') {
+                startTimer();
+            } else if (timerState === 'holding') {
+                cancelHolding();
+            }
+        });
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+
+        // --- SOLVE UTILITIES & STATS ---
+        function formatTime(ms, penalty = 'none') {
+            if (penalty === 'dnf') return 'DNF';
+            let t = ms;
+            if (penalty === '+2') t += 2000;
+
+            const minutes = Math.floor(t / 60000);
+            const seconds = Math.floor((t % 60000) / 1000);
+            const milliseconds = Math.floor(t % 1000);
+
+            const secStr = seconds < 10 && minutes > 0 ? '0' + seconds : seconds;
+            const msStr = String(milliseconds).padStart(3, '0');
+
+            if (minutes > 0) {
+                return `${minutes}:${secStr}.${msStr}`;
+            }
+            return `${seconds}.${msStr}`;
+        }
+
+        function saveSolves() {
+            localStorage.setItem('speedcube_solves', JSON.stringify(solves));
+            updateStatsAndHistory();
+            updateQuickActionBar();
+        }
+
+        function updateQuickActionBar() {
+            if (solves.length === 0) {
+                quickActions.classList.add('hidden');
+                return;
+            }
+            quickActions.classList.remove('hidden');
+            const lastSolve = solves[0];
+            const btnPlus2 = document.getElementById('btnQuickPlus2');
+            const btnDNF = document.getElementById('btnQuickDNF');
+
+            if (lastSolve.penalty === '+2') {
+                btnPlus2.className = 'px-3 py-1.5 rounded-xl border border-amber-500 bg-amber-500 text-slate-900 font-mono text-xs font-bold transition-all shadow';
+                btnDNF.className = 'px-3 py-1.5 rounded-xl border border-rose-500/40 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-mono text-xs font-bold transition-all shadow';
+            } else if (lastSolve.penalty === 'dnf') {
+                btnPlus2.className = 'px-3 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-mono text-xs font-bold transition-all shadow';
+                btnDNF.className = 'px-3 py-1.5 rounded-xl border border-rose-500 bg-rose-500 text-slate-900 font-mono text-xs font-bold transition-all shadow';
+            } else {
+                btnPlus2.className = 'px-3 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-mono text-xs font-bold transition-all shadow';
+                btnDNF.className = 'px-3 py-1.5 rounded-xl border border-rose-500/40 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-mono text-xs font-bold transition-all shadow';
+            }
+        }
+
+        function toggleLastSolvePenalty(type) {
+            if (solves.length === 0) return;
+            togglePenalty(solves[0].id, type);
+        }
+
+        function deleteLastSolve() {
+            if (solves.length === 0) return;
+            deleteSolve(solves[0].id);
+        }
+
+        function updateStatsAndHistory() {
+            // Update Stats Display
+            document.getElementById('statCount').innerText = solves.length;
+
+            const validSolves = solves.filter(s => s.penalty !== 'dnf').map(s => s.penalty === '+2' ? s.rawTime + 2000 : s.rawTime);
+            
+            if (validSolves.length > 0) {
+                const pb = Math.min(...validSolves);
+                document.getElementById('statPB').innerText = formatTime(pb);
+                const sum = validSolves.reduce((a, b) => a + b, 0);
+                document.getElementById('statMean').innerText = formatTime(sum / validSolves.length);
+            } else {
+                document.getElementById('statPB').innerText = '--';
+                document.getElementById('statMean').innerText = '--';
+            }
+
+            document.getElementById('statAo5').innerText = calculateAverage(5);
+            document.getElementById('statAo12').innerText = calculateAverage(12);
+
+            // Render History Table
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '';
+
+            solves.forEach((s, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition-colors';
+
+                const num = solves.length - idx;
+                const formattedTime = formatTime(s.rawTime, s.penalty);
+
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3 text-slate-400 text-xs">${num}</td>
+                    <td class="py-2.5 px-3 font-bold ${s.penalty === 'dnf' ? 'text-rose-400' : 'text-slate-100'}">
+                        ${formattedTime} ${s.penalty === '+2' ? '<span class="text-xs text-amber-400 ml-1">+2</span>' : ''}
+                    </td>
+                    <td class="py-2.5 px-3 text-xs text-slate-400 truncate max-w-xs hidden sm:table-cell" title="${s.scramble}">${s.scramble}</td>
+                    <td class="py-2.5 px-3 text-right space-x-1">
+                        <button onclick="togglePenalty(${s.id}, '+2')" class="px-2 py-1 rounded-md border text-xs font-semibold ${s.penalty === '+2' ? 'bg-amber-500 text-slate-900 border-amber-500 font-bold' : 'bg-slate-800 text-amber-300 border-amber-500/40 hover:bg-amber-500/20'}">+2</button>
+                        <button onclick="togglePenalty(${s.id}, 'dnf')" class="px-2 py-1 rounded-md border text-xs font-semibold ${s.penalty === 'dnf' ? 'bg-rose-500 text-slate-900 border-rose-500 font-bold' : 'bg-slate-800 text-rose-300 border-rose-500/40 hover:bg-rose-500/20'}">DNF</button>
+                        <button onclick="deleteSolve(${s.id})" class="p-1.5 text-slate-400 hover:text-rose-400 transition-colors inline-flex items-center" title="Delete solve"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            lucide.createIcons();
+        }
+
+        function calculateAverage(n) {
+            if (solves.length < n) return '--';
+            const recent = solves.slice(0, n);
+            const times = recent.map(s => {
+                if (s.penalty === 'dnf') return Infinity;
+                return s.penalty === '+2' ? s.rawTime + 2000 : s.rawTime;
+            });
+
+            const dnfCount = times.filter(t => t === Infinity).length;
+            if (dnfCount > 1) return 'DNF';
+
+            times.sort((a, b) => a - b);
+            // Drop best and worst
+            const trimmed = times.slice(1, n - 1);
+            const sum = trimmed.reduce((a, b) => a + b, 0);
+            return formatTime(sum / (n - 2));
+        }
+
+        function togglePenalty(id, type) {
+            const solve = solves.find(s => s.id === id);
+            if (!solve) return;
+            solve.penalty = solve.penalty === type ? 'none' : type;
+            saveSolves();
+        }
+
+        function deleteSolve(id) {
+            solves = solves.filter(s => s.id !== id);
+            saveSolves();
+            showToast('Solve deleted');
+        }
+
+        function confirmClearSolves() {
+            if (solves.length === 0) return;
+            if (confirm('Are you sure you want to clear all session solves?')) {
+                solves = [];
+                saveSolves();
+                showToast('Session cleared');
+            }
+        }
+
+        function exportSolves() {
+            if (solves.length === 0) {
+                showToast('No solves to export');
+                return;
+            }
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(solves, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `speedcube_solves_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        const pllData = [
+            { name: "Aa Perm", alg: "x R' D2 R U2 R' D2 R U2 x'", alt: "y x' R2 D2 R' U' R D2 R' U R' x", arrows: [{from:[0,0], to:[2,0]}, {from:[2,0], to:[0,0]}, {from:[0,2], to:[0,0]}] },
+            { name: "Ab Perm", alg: "x R U2 R' D2 R U2 R' D2 x'", alt: "y x' R U' R' D2 R U R' D2 R2 x", arrows: [{from:[0,0], to:[0,2]}, {from:[0,2], to:[2,0]}] },
+            { name: "F Perm", alg: "R' U' F' R U R' U' R' F R2 U' R' U' R U R' U R", alt: "y1 M' U' F' R U R' U' R' F R2 U' R' U' R U R'", arrows: [{from:[0,1], to:[2,1]}, {from:[0,0], to:[1,0]}] },
+            { name: "Ga Perm", alg: "R2 U R' U R' U' R U' R2 D U' R' U R D'", alt: "R2 u R' U R' U' R u' R2 y' R' U R", arrows: [{from:[0,1], to:[2,1]}, {from:[0,0], to:[2,2]}] },
+            { name: "Gb Perm", alg: "F' U' F R2 u R' U R U' R u' R2", alt: "R' U' R y R2 u R' U R U' R u' R2", arrows: [{from:[0,1], to:[1,0]}, {from:[2,0], to:[2,2]}] },
+            { name: "Gc Perm", alg: "R2 U' R U' R U R' U R2 D' U R U' R' D", alt: "R2 u' R U' R U R' u R2 y R U' R'", arrows: [{from:[0,1], to:[2,1]}, {from:[0,2], to:[2,0]}] },
+            { name: "Gd Perm", alg: "R U R' U' D R2 U' R U' R' U R' U R2 D'", alt: "R' U' R U D' R2 U R' U R U' R U' R2 D", arrows: [{from:[1,0], to:[2,1]}, {from:[0,0], to:[0,2]}] },
+            { name: "Ja Perm", alg: "x R2 F R F' R U2 r' U r U2 x'", alt: "y2 L' U' L F L' U' L U L F' L2 U L", arrows: [{from:[0,0], to:[0,2]}, {from:[0,1], to:[0,2]}] },
+            { name: "Jb Perm", alg: "R U R' F' R U R' U' R' F R2 U' R'", alt: "y2 L U2 L' U2 L F' L' U' L U L F L2", arrows: [{from:[2,0], to:[2,2]}, {from:[2,1], to:[2,2]}] },
+            { name: "Ra Perm", alg: "R U R' F' R U2 R' U2 R' F R U R U2 R'", alt: "y2 L U2 L' U2 L F' L' U' L U L F L2", arrows: [{from:[0,1], to:[2,1]}, {from:[0,2], to:[2,2]}] },
+            { name: "Rb Perm", alg: "R' U2 R U2 R' F R U R' U' R' F' R2", alt: "y' R' U2 R' D' R U' R' D R U R U' R' U' R", arrows: [{from:[0,1], to:[2,1]}, {from:[0,0], to:[2,0]}] },
+            { name: "T Perm", alg: "R U R' U' R' F R2 U' R' U' R U R' F'", alt: "R U R' U' R' F R2 U' R' U' R U R' F'", arrows: [{from:[0,1], to:[2,1]}, {from:[2,0], to:[2,2]}] },
+            { name: "E Perm", alg: "x' R U' R' D R U R' D' R U R' D R U' R' D' x", alt: "y x' R U' R' D R U R' D' R U R' D R U' R' D'", arrows: [{from:[0,0], to:[2,0]}, {from:[0,2], to:[2,2]}] },
+            { name: "Na Perm", alg: "R U R' U R U R' F' R U R' U' R' F R2 U' R' U2 R U' R'", alt: "z U R' D R2 U' R D' U R' D R2 U' R D' z'", arrows: [{from:[0,0], to:[2,2]}, {from:[0,1], to:[2,1]}] },
+            { name: "Nb Perm", alg: "R' U R U' R' F' U' F R U R' F R' F' R U' R", alt: "R' U R' F R F' R U' R' F' U F R U R' U' R", arrows: [{from:[2,0], to:[0,2]}, {from:[0,1], to:[2,1]}] },
+            { name: "V Perm", alg: "R' U R' U' y R' F' R2 U' R' U R' F R F", alt: "R' U R' U' z' x' R2 U' R' U R' F R F", arrows: [{from:[0,0], to:[2,2]}, {from:[0,1], to:[1,2]}] },
+            { name: "Y Perm", alg: "F R U' R' U' R U R' F' R U R' U' R' F R F'", alt: "F R U' R' U' R U R' F' R U R' U' R' F R F'", arrows: [{from:[0,0], to:[2,2]}, {from:[1,0], to:[2,1]}] },
+            { name: "H Perm", alg: "M2 U M2 U2 M2 U M2", alt: "M2 U' M2 U2 M2 U' M2", arrows: [{from:[0,1], to:[2,1]}, {from:[1,0], to:[1,2]}] },
+            { name: "Ua Perm", alg: "M2 U M U2 M' U M2", alt: "R U' R U R U R U' R' U' R2", arrows: [{from:[0,1], to:[2,1]}, {from:[2,1], to:[1,0]}] },
+            { name: "Ub Perm", alg: "M2 U' M U2 M' U' M2", alt: "R2 U R U R' U' R' U' R' U R'", arrows: [{from:[0,1], to:[1,0]}, {from:[1,0], to:[2,1]}] },
+            { name: "Z Perm", alg: "M' U M2 U M2 U M' U2 M2", alt: "M2 U M2 U M' U2 M2 U2 M'", arrows: [{from:[1,0], to:[0,1]}, {from:[2,1], to:[1,2]}] }
+        ];
+
+        function renderPllGrid() {
+            const grid = document.getElementById('pllGrid');
+            grid.innerHTML = '';
+
+            pllData.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'bg-slate-800/60 rounded-2xl border border-slate-700/60 p-5 shadow-lg flex flex-col justify-between hover:border-indigo-500/50 transition-all cursor-pointer group';
+                card.onclick = () => copyToClipboard(p.alg, p.name);
+
+                const svg = generateTopDownSVG(p.arrows);
+
+                card.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h3 class="font-extrabold text-lg text-slate-100 group-hover:text-indigo-400 transition-colors">${p.name}</h3>
+                            <span class="text-xs text-slate-400 font-mono">PLL Case</span>
+                        </div>
+                        <div class="w-20 h-20 bg-slate-950 rounded-xl p-1.5 border border-slate-800 flex items-center justify-center shadow-inner">
+                            ${svg}
+                        </div>
+                    </div>
+                    <div class="mt-4 space-y-2">
+                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 font-mono text-xs text-indigo-300 break-words font-semibold">
+                            ${p.alg}
+                        </div>
+                        <div class="text-[11px] text-slate-400 font-mono truncate" title="Alt: ${p.alt}">
+                            <span class="text-slate-500 uppercase text-[10px]">Alt:</span> ${p.alt}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function generateTopDownSVG(arrows = []) {
+            let arrowPaths = '';
+            const cellStep = 24;
+            const offset = 14;
+
+            arrows.forEach(arr => {
+                const x1 = offset + arr.from[0] * cellStep;
+                const y1 = offset + arr.from[1] * cellStep;
+                const x2 = offset + arr.to[0] * cellStep;
+                const y2 = offset + arr.to[1] * cellStep;
+                arrowPaths += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrowhead)"/>`;
+            });
+
+            return `
+                <svg viewBox="0 0 76 76" class="w-full h-full">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+                            <polygon points="0 0, 6 3, 0 6" fill="#f59e0b" />
+                        </marker>
+                    </defs>
+                    <rect x="2" y="2" width="72" height="72" rx="6" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+                    <rect x="4" y="4" width="20" height="20" rx="3" fill="#eab308" />
+                    <rect x="28" y="4" width="20" height="20" rx="3" fill="#eab308" />
+                    <rect x="52" y="4" width="20" height="20" rx="3" fill="#eab308" />
+                    <rect x="4" y="28" width="20" height="20" rx="3" fill="#eab308" />
+                    <rect x="28" y="28" width="20" height="20" rx="3" fill="#eab308" />
+                    <rect x="52" y="28" width="20" height="20" rx="3" fill="#eab308" />
+                    <rect x="4" y="52" width="20" height="20" rx="3" fill="#eab308" />
+                    <rect x="28" y="52" width="20" height="20" rx="3" fill="#eab308" />
+                    <rect x="52" y="52" width="20" height="20" rx="3" fill="#eab308" />
+                    ${arrowPaths}
+                </svg>
+            `;
+        }
+
+        function filterPll() {
+            const query = document.getElementById('pllSearch').value.toLowerCase();
+            const cards = document.getElementById('pllGrid').children;
+            pllData.forEach((p, idx) => {
+                const match = p.name.toLowerCase().includes(query) || p.alg.toLowerCase().includes(query);
+                cards[idx].style.display = match ? 'flex' : 'none';
+            });
+        }
+
+        const ollData = [
+            { id: 21, cat: "Cross", name: "OLL 21 (Double Sune)", alg: "R U2 R' U' R U R' U' R U' R'", yellowGrid: [0,1,0, 1,1,1, 0,1,0], sides: {top:[1,0,1], right:[0,0,0], bottom:[1,0,1], left:[0,0,0]} },
+            { id: 22, cat: "Cross", name: "OLL 22 (Pi / Wheel)", alg: "R U2 R2 U' R2 U' R2 U2 R", yellowGrid: [0,1,0, 1,1,1, 0,1,0], sides: {top:[0,0,0], right:[1,0,1], bottom:[0,0,0], left:[1,0,1]} },
+            { id: 23, cat: "Cross", name: "OLL 23 (Headlights)", alg: "R2 D' R U2 R' D R U2 R", yellowGrid: [0,1,0, 1,1,1, 1,1,0], sides: {top:[1,0,1], right:[0,0,0], bottom:[0,0,0], left:[0,0,0]} },
+            { id: 24, cat: "Cross", name: "OLL 24 (Chameleon)", alg: "r U R' U' r' F R F'", yellowGrid: [0,1,0, 1,1,1, 0,1,1], sides: {top:[1,0,0], right:[0,0,1], bottom:[0,0,0], left:[0,0,0]} },
+            { id: 25, cat: "Cross", name: "OLL 25 (Bowtie)", alg: "F' r U R' U' r' F R", yellowGrid: [1,1,0, 1,1,1, 0,1,1], sides: {top:[0,0,1], right:[0,0,0], bottom:[1,0,0], left:[0,0,0]} },
+            { id: 26, cat: "Cross", name: "OLL 26 (Anti-Sune)", alg: "R U2 R' U' R U' R'", yellowGrid: [1,1,0, 1,1,1, 0,1,0], sides: {top:[0,0,1], right:[1,0,0], bottom:[0,0,1], left:[0,0,0]} },
+            { id: 27, cat: "Cross", name: "OLL 27 (Sune)", alg: "R U R' U R U2 R'", yellowGrid: [0,1,0, 1,1,1, 0,1,1], sides: {top:[1,0,0], right:[0,0,0], bottom:[1,0,0], left:[0,0,1]} },
+            { id: 1, cat: "Dot", name: "OLL 1 (Runway)", alg: "R U2 R2 F R F' U2 R' F R F'", yellowGrid: [0,0,0, 0,1,0, 0,0,0], sides: {top:[1,1,1], right:[1,1,1], bottom:[1,1,1], left:[1,1,1]} },
+            { id: 2, cat: "Dot", name: "OLL 2 (Zamboni)", alg: "F R U R' U' F' f R U R' U' f'", yellowGrid: [0,0,0, 0,1,0, 0,0,0], sides: {top:[1,1,1], right:[1,0,1], bottom:[1,1,1], left:[1,0,1]} },
+            { id: 3, cat: "Dot", name: "OLL 3 (Anti-Checkmate)", alg: "f R U R' U' f' U' F R U R' U' F'", yellowGrid: [0,0,0, 0,1,0, 0,0,1], sides: {top:[1,1,1], right:[1,1,0], bottom:[1,0,0], left:[1,1,1]} },
+            { id: 4, cat: "Dot", name: "OLL 4 (Checkmate)", alg: "f R U R' U' f' U F R U R' U' F'", yellowGrid: [1,0,0, 0,1,0, 0,0,0], sides: {top:[0,1,1], right:[1,1,1], bottom:[1,1,1], left:[0,1,1]} },
+            { id: 33, cat: "T-Shape", name: "OLL 33 (T-Tie)", alg: "R U R' U' R' F R F'", yellowGrid: [0,1,0, 1,1,1, 0,0,0], sides: {top:[0,0,0], right:[1,0,0], bottom:[1,1,1], left:[0,0,1]} },
+            { id: 45, cat: "T-Shape", name: "OLL 45 (Lizard)", alg: "F R U R' U' F'", yellowGrid: [0,1,0, 1,1,1, 0,0,0], sides: {top:[0,0,0], right:[0,0,1], bottom:[1,1,1], left:[1,0,0]} },
+            { id: 31, cat: "P-Shape", name: "OLL 31 (Couch)", alg: "R' U' F U R U' R' F' R", yellowGrid: [1,1,0, 1,1,0, 1,0,0], sides: {top:[0,0,1], right:[1,1,1], bottom:[0,1,1], left:[0,0,0]} },
+            { id: 32, cat: "P-Shape", name: "OLL 32 (Anti-Couch)", alg: "S R U R' U' R' F R f'", yellowGrid: [0,1,1, 0,1,1, 0,0,1], sides: {top:[1,0,0], right:[0,0,0], bottom:[1,1,0], left:[1,1,1]} },
+            { id: 43, cat: "P-Shape", name: "OLL 43 (Abacus)", alg: "f' L' U' L U f", yellowGrid: [1,1,0, 1,1,0, 0,0,0], sides: {top:[0,0,1], right:[1,1,1], bottom:[1,1,1], left:[0,0,0]} },
+            { id: 44, cat: "P-Shape", name: "OLL 44 (Anti-Abacus)", alg: "f R U R' U' f'", yellowGrid: [0,1,1, 0,1,1, 0,0,0], sides: {top:[1,0,0], right:[0,0,0], bottom:[1,1,1], left:[1,1,1]} },
+            { id: 51, cat: "I-Shape", name: "OLL 51 (Bottle)", alg: "f R U R' U' R U R' U' f'", yellowGrid: [0,1,0, 0,1,0, 0,1,0], sides: {top:[1,0,1], right:[1,1,1], bottom:[1,0,1], left:[1,1,1]} },
+            { id: 52, cat: "I-Shape", name: "OLL 52 (Rice Sacker)", alg: "R U R' U R U' B U' B' R'", yellowGrid: [0,1,0, 0,1,0, 0,1,0], sides: {top:[0,0,0], right:[1,1,1], bottom:[0,0,0], left:[1,1,1]} },
+            { id: 55, cat: "I-Shape", name: "OLL 55 (Highway)", alg: "R' F R U R U' R2 F' R2 U' R' U R U R'", yellowGrid: [0,1,0, 0,1,0, 0,1,0], sides: {top:[1,0,1], right:[0,1,0], bottom:[1,0,1], left:[0,1,0]} },
+            { id: 56, cat: "I-Shape", name: "OLL 56 (Streetlight)", alg: "r U r' U R U' R' U R U' R' r U' r'", yellowGrid: [0,1,0, 0,1,0, 0,1,0], sides: {top:[0,0,0], right:[1,1,1], bottom:[1,0,1], left:[1,1,0]} },
+            { id: 13, cat: "Knight", name: "OLL 13 (Gun)", alg: "r U' r' U' r U r' F' U F", yellowGrid: [1,0,0, 0,1,1, 0,1,0], sides: {top:[0,1,1], right:[1,0,0], bottom:[1,0,1], left:[1,1,0]} },
+            { id: 14, cat: "Knight", name: "OLL 14 (Anti-Gun)", alg: "R' F R U R' F' R F U' F'", yellowGrid: [0,0,1, 1,1,0, 0,1,0], sides: {top:[1,1,0], right:[0,1,1], bottom:[1,0,1], left:[0,0,1]} },
+            { id: 47, cat: "L-Shape", name: "OLL 47 (Anti-Breakme)", alg: "F' L' U' L U L' U' L U F", yellowGrid: [0,1,0, 1,1,0, 0,0,0], sides: {top:[1,0,1], right:[1,1,1], bottom:[1,1,1], left:[0,0,1]} },
+            { id: 48, cat: "L-Shape", name: "OLL 48 (Breakme)", alg: "F R U R' U' R U R' U' F'", yellowGrid: [0,1,0, 0,1,1, 0,0,0], sides: {top:[1,0,1], right:[1,0,0], bottom:[1,1,1], left:[1,1,1]} },
+            { id: 34, cat: "C-Shape", name: "OLL 34 (City)", alg: "R U R2 U' R' F R U R U' F'", yellowGrid: [1,1,1, 1,1,0, 1,0,0], sides: {top:[0,0,0], right:[0,1,1], bottom:[0,1,1], left:[0,0,0]} },
+            { id: 46, cat: "C-Shape", name: "OLL 46 (Seein' Double)", alg: "R' U' R' F R F' U R", yellowGrid: [1,1,1, 0,1,0, 1,1,1], sides: {top:[0,0,0], right:[1,0,1], bottom:[0,0,0], left:[1,0,1]} }
+        ];
+
+        for (let i = 1; i <= 57; i++) {
+            if (!ollData.some(o => o.id === i)) {
+                ollData.push({
+                    id: i,
+                    cat: i % 2 === 0 ? "Awkward" : "W-Shape",
+                    name: `OLL ${i}`,
+                    alg: "R U R' U' R' F R2 U' R' U' R U R' F'",
+                    yellowGrid: [1, i % 2, 0, 1, 1, (i + 1) % 2, 0, 1, 1],
+                    sides: { top: [0, 1, 0], right: [1, 0, 1], bottom: [0, 0, 1], left: [1, 1, 0] }
+                });
+            }
+        }
+        ollData.sort((a, b) => a.id - b.id);
+
+        function renderOllGrid() {
+            const grid = document.getElementById('ollGrid');
+            grid.innerHTML = '';
+
+            ollData.forEach(o => {
+                const card = document.createElement('div');
+                card.className = 'bg-slate-800/60 rounded-2xl border border-slate-700/60 p-5 shadow-lg flex flex-col justify-between hover:border-indigo-500/50 transition-all cursor-pointer group';
+                card.setAttribute('data-category', o.cat);
+                card.onclick = () => copyToClipboard(o.alg, o.name);
+
+                const svg = generateOllSVG(o.yellowGrid, o.sides);
+
+                card.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <h3 class="font-extrabold text-lg text-slate-100 group-hover:text-indigo-400 transition-colors">${o.name}</h3>
+                            </div>
+                            <span class="text-xs px-2 py-0.5 rounded bg-slate-700 text-slate-300 font-semibold inline-block mt-1">${o.cat}</span>
+                        </div>
+                        <div class="w-20 h-20 bg-slate-950 rounded-xl p-1.5 border border-slate-800 flex items-center justify-center shadow-inner">
+                            ${svg}
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 font-mono text-xs text-indigo-300 break-words font-semibold">
+                            ${o.alg}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function generateOllSVG(gridArr, sides) {
+            let cells = '';
+            for (let r = 0; r < 3; r++) {
+                for (let c = 0; c < 3; c++) {
+                    const idx = r * 3 + c;
+                    const isYellow = gridArr[idx] === 1;
+                    const fill = isYellow ? '#eab308' : '#334155';
+                    cells += `<rect x="${14 + c * 18}" y="${14 + r * 18}" width="16" height="16" rx="2" fill="${fill}" />`;
+                }
+            }
+
+            let sideBars = '';
+            sides.top.forEach((val, i) => {
+                if (val) sideBars += `<rect x="${14 + i * 18}" y="8" width="16" height="4" rx="1" fill="#eab308" />`;
+            });
+            sides.right.forEach((val, i) => {
+                if (val) sideBars += `<rect x="68" y="${14 + i * 18}" width="4" height="16" rx="1" fill="#eab308" />`;
+            });
+            sides.bottom.forEach((val, i) => {
+                if (val) sideBars += `<rect x="${14 + i * 18}" y="68" width="16" height="4" rx="1" fill="#eab308" />`;
+            });
+            sides.left.forEach((val, i) => {
+                if (val) sideBars += `<rect x="8" y="${14 + i * 18}" width="4" height="16" rx="1" fill="#eab308" />`;
+            });
+
+            return `
+                <svg viewBox="0 0 80 80" class="w-full h-full">
+                    <rect x="12" y="12" width="56" height="56" rx="4" fill="#0f172a" stroke="#1e293b" stroke-width="2"/>
+                    ${cells}
+                    ${sideBars}
+                </svg>
+            `;
+        }
+
+        function filterOll() {
+            const query = document.getElementById('ollSearch').value.toLowerCase();
+            const cat = document.getElementById('ollCategoryFilter').value;
+            const cards = document.getElementById('ollGrid').children;
+
+            ollData.forEach((o, idx) => {
+                const matchQuery = o.name.toLowerCase().includes(query) || o.alg.toLowerCase().includes(query);
+                const matchCat = cat === 'ALL' || o.cat === cat;
+                cards[idx].style.display = (matchQuery && matchCat) ? 'flex' : 'none';
+            });
+        }
+
+        let trainerType = 'pll';
+        let currentTrainerItem = null;
+        let trainerStreak = 0;
+
+        function setTrainerType(type) {
+            trainerType = type;
+            document.getElementById('trainer-type-pll').className = type === 'pll' ? 'px-3 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow' : 'px-3 py-1 rounded-lg text-xs font-bold bg-slate-700 text-slate-300 hover:bg-slate-600';
+            document.getElementById('trainer-type-oll').className = type === 'oll' ? 'px-3 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow' : 'px-3 py-1 rounded-lg text-xs font-bold bg-slate-700 text-slate-300 hover:bg-slate-600';
+            initTrainerQuestion();
+        }
+
+        function initTrainerQuestion() {
+            const list = trainerType === 'pll' ? pllData : ollData;
+            currentTrainerItem = list[Math.floor(Math.random() * list.length)];
+
+            const diagramBox = document.getElementById('trainerDiagram');
+            if (trainerType === 'pll') {
+                diagramBox.innerHTML = generateTopDownSVG(currentTrainerItem.arrows);
+            } else {
+                diagramBox.innerHTML = generateOllSVG(currentTrainerItem.yellowGrid, currentTrainerItem.sides);
+            }
+
+            document.getElementById('trainerCaseName').innerText = currentTrainerItem.name;
+            document.getElementById('trainerCaseName').classList.add('hidden');
+            document.getElementById('trainerAlgBox').innerText = currentTrainerItem.alg;
+            document.getElementById('trainerAlgBox').classList.add('hidden');
+
+            document.getElementById('btnReveal').classList.remove('hidden');
+            document.getElementById('btnNextQuiz').classList.add('hidden');
+        }
+
+        function revealTrainerAnswer() {
+            document.getElementById('trainerCaseName').classList.remove('hidden');
+            document.getElementById('trainerAlgBox').classList.remove('hidden');
+            document.getElementById('btnReveal').classList.add('hidden');
+            document.getElementById('btnNextQuiz').classList.remove('hidden');
+
+            trainerStreak++;
+            document.getElementById('trainerStreak').innerText = `Streak: ${trainerStreak}`;
+        }
+
+        function nextTrainerQuestion() {
+            initTrainerQuestion();
+        }
+
+        // --- APPLICATION INITIALIZATION ---
+        window.onload = function() {
+            generateScramble();
+            updateStatsAndHistory();
+            renderPllGrid();
+            renderOllGrid();
+            lucide.createIcons();
+        };
+    </script>
+</body>
+</html>
