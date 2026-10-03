@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpeedCube Pro | Speedtimer & Alg Library</title>
+    <title>Cubenji | Speedtimer & Alg Library</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -65,7 +65,7 @@
                         <i data-lucide="box" class="w-5 h-5 text-white"></i>
                     </div>
                     <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-indigo-400 to-violet-300 bg-clip-text text-transparent">
-                        SpeedCube<span class="text-xs ml-1 px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">PRO</span>
+                        Cubenji<span class="text-xs ml-1 px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">PRO</span>
                     </span>
                 </div>
 
@@ -491,7 +491,7 @@
         let timerInterval = null;
         let startTime = 0;
         let elapsedTime = 0;
-        let solves = JSON.parse(localStorage.getItem('speedcube_solves') || '[]');
+        let solves = JSON.parse(localStorage.getItem('cubenji_solves') || localStorage.getItem('speedcube_solves') || '[]');
 
         const timerDisplay = document.getElementById('timerDisplay');
         const timerContainer = document.getElementById('timerContainer');
@@ -648,7 +648,7 @@
         }
 
         function saveSolves() {
-            localStorage.setItem('speedcube_solves', JSON.stringify(solves));
+            localStorage.setItem('cubenji_solves', JSON.stringify(solves));
             updateStatsAndHistory();
             updateQuickActionBar();
         }
@@ -781,7 +781,7 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(solves, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `speedcube_solves_${new Date().toISOString().slice(0,10)}.json`);
+            downloadAnchor.setAttribute("download", `cubenji_solves_${new Date().toISOString().slice(0,10)}.json`);
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
